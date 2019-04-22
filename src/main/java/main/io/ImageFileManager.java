@@ -7,23 +7,22 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Created by moles on 2016-09-09.
  */
 public class ImageFileManager {
 
-    public ImageFileManager() {
-    }
+    private final String DOT = ".";
+    private static final Logger logger = Logger.getLogger(ImageFileManager.class.getName());
 
-    /**
-     * @param path file path
-     * @return imageContainer
-     * @throws IOException in out error
-     */
-    public static ImageContainer loadFromDisk(String path) throws IOException {
+    public ImageContainer loadFromDisk(String path) throws IOException {
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
         BufferedImage bufferedImage = ImageIO.read(new File(path));
-        String format = extractFormat(path);
+        ImageFormat format = extractFormat(path);
         String filePath = null;
         try {
             filePath = extractPathWithOutFormat(path, format);
@@ -33,19 +32,14 @@ public class ImageFileManager {
         return imageContainer;
     }
 
-    /**
-     *
-     * @param imageContainer image
-     * @return result
-     */
-    public static boolean saveForDisk(ImageContainer imageContainer)  {
+    public boolean saveForDisk(ImageContainer imageContainer) {
         BufferedImage bufferedImage = imageContainer.getBufferedImage();
-        String path = imageContainer.getFilePath();
-        String format = imageContainer.getImageFormat();
-        File file = new File(path + "." + format);
+        String path = extractPathWithOutFormat(imageContainer.getFilePath(), imageContainer.getImageFormat());
+        ImageFormat format = imageContainer.getImageFormat();
+        File file = new File(path + DOT + format.name().toLowerCase());
         try {
-            ImageIO.write(bufferedImage, format, file);
-        }catch (IOException e){
+            ImageIO.write(bufferedImage, format.name(), file);
+        } catch (IOException e) {
             System.err.println(e);
             return false;
         }
@@ -57,49 +51,31 @@ public class ImageFileManager {
      * @return file format
      * @throws IllegalArgumentException path is wrong
      */
-    public static String extractFormat(String path) throws IllegalArgumentException {
-        if (path == null || "".equals(path)) {
-            throw new IllegalArgumentException();
-        }
-        String result = "";
-        for (String s : ImageFormat.formats) {
-            if (path.contains("." + s)) {
-                result = s;
+    private ImageFormat extractFormat(String path) throws IllegalArgumentException {
+        ImageFormat result = ImageFormat.JPG;
+        if (canExtractFormat(path)) {
+            int indexOfDot = path.lastIndexOf(DOT);
+            String substring = path.substring(indexOfDot + 1);
+            try {
+                result = ImageFormat.valueOf(substring.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                logger.warning(e.getMessage() + " value: " + substring);
             }
-        }
-        if (result.equals("")) {
-            result = "bmp";
+
         }
         return result;
     }
 
-    /**
-     * @param path   path
-     * @param format format
-     * @return path without file format
-     */
-    public static String extractPathWithOutFormat(String path, String format)
-             {
-        if (path == null || format == null || "".equals(path)) {
-            throw new IllegalArgumentException();
-        }
-        int i;
-        String result = "";
-        if (!"".equals(format)) {
-            i = path.indexOf("." + format);
-            if (i != -1) {
-                result = path.substring(0, i);
-            } else {
+    private boolean canExtractFormat(String path) {
+        int indexOfDot = path.lastIndexOf(DOT);
+        return indexOfDot > 0 && path.length() - 1 > indexOfDot;
+    }
 
-            }
-        } else {
-            i = path.indexOf(".");
-            if (i != -1) {
-                result = path.substring(0, i);
-            } else {
-                result = path;
-            }
+    private String extractPathWithOutFormat(String path, ImageFormat format) {
+        int indexOfFormat = path.indexOf(format.name().toLowerCase());
+        if (indexOfFormat > 0) {
+            return path.substring(0, indexOfFormat - 1);
         }
-        return result;
+        return path;
     }
 }

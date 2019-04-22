@@ -3,19 +3,17 @@ package main.data;
 import java.awt.image.BufferedImage;
 
 /**
- * Created by moles on 2016-09-09.
- * This is container used to save data with path and format  and easy change it
- *
- * @author moles
+ * @author michal.oles
+ * @version 1.01
  */
 public class ImageContainer {
     private BufferedImage bufferedImage;
     private int numberOfColumn;
     private int numberOfLine;
     private String filePath;
-    private String imageFormat;
+    private ImageFormat imageFormat;
 
-    public ImageContainer(BufferedImage bufferedImage, String filePath, String imageFormat) {
+    public ImageContainer(BufferedImage bufferedImage, String filePath, ImageFormat imageFormat) {
         this.bufferedImage = bufferedImage;
         this.numberOfColumn = bufferedImage.getWidth();
         this.numberOfLine = bufferedImage.getHeight();
@@ -55,12 +53,11 @@ public class ImageContainer {
         this.filePath = filePath;
     }
 
-    public String getImageFormat() {
+    public ImageFormat getImageFormat() {
         return imageFormat;
     }
 
-    public void setImageFormat(String imageFormat) {
+    public void setImageFormat(ImageFormat imageFormat) {
         this.imageFormat = imageFormat;
     }
-
 }

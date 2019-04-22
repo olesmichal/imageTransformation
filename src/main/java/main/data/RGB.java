@@ -12,9 +12,6 @@ public class RGB {
     private int green;
     private int blue;
 
-    /**
-     *
-     */
     public RGB() {
         red = 0;
         green = 0;
